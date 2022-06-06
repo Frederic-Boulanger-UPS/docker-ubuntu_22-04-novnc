@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=KillSession
+GenericName=Terminate NoVNC session
+Exec=/usr/local/bin/killsession.py
+StartupNotify=true
+Terminal=false
+Icon=/usr/local/share/pixmaps/killsession.png
+Type=Application
+Categories=System;
