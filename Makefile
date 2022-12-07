@@ -21,7 +21,7 @@ build: $(templates)
 	  docker rmi $$(docker images --filter "dangling=true" -q); \
 	fi
 
-from-scratch: $(templates) yarnpkg_pubkey.gpg
+from-scratch: $(templates)
 	docker build --no-cache --pull --tag $(REPO)$(NAME):$(TAG)-$(ARCH) .
 	@danglingimages=$$(docker images --filter "dangling=true" -q); \
 	if [[ $$danglingimages != "" ]]; then \
