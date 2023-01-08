@@ -31,6 +31,23 @@ Run the docker container and access with port `6080`
 docker run -p 6080:80 fredblgr/ubuntu-novnc:22.04
 ```
 
+```yaml
+version: '3.9'
+services:
+    ubuntu-novnc:
+        ports:
+            - '6080:80'
+        volumes:
+            - '$pwd:/workspace:rw'
+        environment:
+            - USER=root
+            - PASSWORD=root;
+            - HTTP_PASSWORD=root
+            - RESOLUTION=1920x1080
+        container_name: ubuntu-novnc
+        image: 'fredblgr/ubuntu-novnc:22.04'
+```
+
 Browse http://127.0.0.1:6080/
 
 
