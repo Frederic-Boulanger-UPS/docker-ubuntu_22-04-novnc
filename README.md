@@ -37,12 +37,14 @@ services:
     ubuntu-novnc:
         ports:
             - '6080:80'
+            - '5900:5900'
         volumes:
             - '$pwd:/workspace:rw'
         environment:
             - USER=root
             - PASSWORD=root;
             - HTTP_PASSWORD=root
+            - VNC_PASSWORD=root
             - RESOLUTION=1920x1080
         container_name: ubuntu-novnc
         image: 'fredblgr/ubuntu-novnc:22.04'
