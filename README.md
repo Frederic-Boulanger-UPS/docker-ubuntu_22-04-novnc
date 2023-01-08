@@ -50,8 +50,9 @@ services:
         image: 'fredblgr/ubuntu-novnc:22.04'
 ```
 
-Browse http://127.0.0.1:6080/
+Browse http://127.0.0.1:6080
 
+> Or vnc://127.0.0.1:5900
 
 VNC Viewer
 ------------------
