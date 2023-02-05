@@ -49,6 +49,13 @@ COPY mozilla-firefox_aptprefs.txt /etc/apt/preferences.d/mozilla-firefox
 RUN add-apt-repository -y ppa:mozillateam/ppa
 RUN apt-get update && apt-get install -y --allow-downgrades firefox fonts-lyx
 
+# Chromium beta with apt, not snap (which does not run in the container)
+COPY chromium_aptprefs.txt /etc/apt/preferences.d/chromium
+RUN sudo add-apt-repository -y ppa:saiarcot895/chromium-beta
+RUN  apt-get update && apt-get install -y --allow-downgrades chromium-browser
+# fıx for startup wıth root
+RUN sed -i 's/Exec=chromium-browser %U/Exec=chromium-browser %U --no-sandbox/g' /usr/share/applications/chromium-browser.desktop
+
 # Killsession app
 COPY killsession/ /tmp/killsession
 RUN cd /tmp/killsession; \
