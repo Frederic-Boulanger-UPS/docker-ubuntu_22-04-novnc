@@ -4,7 +4,7 @@
 REPO  ?= fredblgr/
 NAME  ?= ubuntu-novnc
 TAG   ?= 22.04
-ARCH  := $$(arch=$$(uname -m); if [[ $$arch == "x86_64" ]]; then echo amd64; else echo $$arch; fi)
+ARCH  ?= $$(arch=$$(uname -m); if [[ $$arch == "x86_64" ]]; then echo amd64; else echo $$arch; fi)
 RESOL   = 1440x900
 ARCHS = amd64 arm64
 IMAGES := $(ARCHS:%=$(REPO)$(NAME):$(TAG)-%)
@@ -15,14 +15,14 @@ templates = Dockerfile rootfs/etc/supervisor/conf.d/supervisord.conf
 
 # Rebuild the container image and remove intermediary images
 build: $(templates)
-	docker build --tag $(REPO)$(NAME):$(TAG)-$(ARCH) .
+	docker build --platform "linux/$(ARCH)" --tag $(REPO)$(NAME):$(TAG)-$(ARCH) .
 	@danglingimages=$$(docker images --filter "dangling=true" -q); \
 	if [[ $$danglingimages != "" ]]; then \
 	  docker rmi $$(docker images --filter "dangling=true" -q); \
 	fi
 
 from-scratch: $(templates)
-	docker build --no-cache --pull --tag $(REPO)$(NAME):$(TAG)-$(ARCH) .
+	docker build --platform "linux/$(ARCH)" --no-cache --pull --tag $(REPO)$(NAME):$(TAG)-$(ARCH) .
 	@danglingimages=$$(docker images --filter "dangling=true" -q); \
 	if [[ $$danglingimages != "" ]]; then \
 	  docker rmi $$(docker images --filter "dangling=true" -q); \
@@ -63,6 +63,7 @@ check:
 run:
 	echo "http://localhost:6080"
 	docker run --rm --detach \
+	  --platform "linux/$(ARCH)" \
 		--publish 6080:80 \
 		--volume "${PWD}":/workspace:rw \
 		--env USERNAME=`id -n -u` --env USERID=`id -u` \
@@ -76,6 +77,7 @@ run:
 runasroot:
 	echo "http://localhost:6080"
 	docker run --rm --detach \
+	  --platform "linux/$(ARCH)" \
 		--publish 6080:80 \
 		--volume "${PWD}":/workspace:rw \
 		--env "RESOLUTION=$(RESOL)" \
@@ -87,6 +89,7 @@ runasroot:
 debug:
 	echo "http://localhost:6080"
 	docker run --rm --tty --interactive \
+	  --platform "linux/$(ARCH)" \
 		--publish 6080:80 \
 		--volume "${PWD}":/workspace:rw \
 		--env USERNAME=`id -n -u` --env USERID=`id -u` \
