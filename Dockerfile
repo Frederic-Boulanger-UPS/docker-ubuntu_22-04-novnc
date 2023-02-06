@@ -50,7 +50,6 @@ RUN add-apt-repository -y ppa:mozillateam/ppa
 RUN apt-get update && apt-get install -y --allow-downgrades firefox fonts-lyx
 
 # Chromium beta with apt, not snap (which does not run in the container)
-
 COPY chromium_aptprefs.txt /etc/apt/preferences.d/chromium
 RUN sudo add-apt-repository -y ppa:saiarcot895/chromium-beta
 RUN  apt-get update && apt-get install -y --allow-downgrades chromium-browser

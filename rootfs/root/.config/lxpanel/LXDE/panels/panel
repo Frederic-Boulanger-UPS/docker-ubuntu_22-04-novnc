@@ -53,6 +53,9 @@ Plugin {
     Button {
       id=firefox.desktop
     }
+    Button {
+      id=chromium-browser.desktop
+    }
   }
 }
 Plugin {
