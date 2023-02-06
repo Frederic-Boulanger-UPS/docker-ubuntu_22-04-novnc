@@ -1,0 +1,4 @@
+
+package: chromium*
+Pin: release o=Ubuntu*
+Pin-Priority: -1
