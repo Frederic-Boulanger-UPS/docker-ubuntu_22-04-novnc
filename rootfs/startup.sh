@@ -45,7 +45,7 @@ if [ "$USER" != "root" ]; then
     useradd --create-home --skel /root --shell /bin/bash --user-group --groups adm,sudo $UIDOPT $UIDVAL $USER
     HOME=/home/$USER
     echo "$USER:$PASSWORD" | chpasswd
-    cp -r /root/{.profile,.bashrc,.config,.gtkrc-2.0,.gtk-bookmarks} ${HOME}
+    cp -rn /root/{.profile,.bashrc,.config,.gtkrc-2.0,.gtk-bookmarks} ${HOME}
     if [ -r "/root/.novnc_setup" ]; then
       source /root/.novnc_setup
     fi

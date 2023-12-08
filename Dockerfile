@@ -11,26 +11,12 @@ ENV TZ=Europe/Paris
 ENV LIBGL_ALWAYS_INDIRECT=1
 
 # built-in packages
-RUN apt-get update && apt-get upgrade -y && apt-get install apt-utils -y \
-    && apt-get install -y software-properties-common curl apache2-utils \
-    && apt-get update \
-    && apt-get install -y \
-        supervisor nginx sudo net-tools zenity \
-        dbus-x11 x11-utils alsa-utils \
-        mesa-utils wget
-
-# install debs error if combine together
-RUN apt-get update \
-    && apt-get install -y \
-        xvfb x11vnc \
-        vim-tiny ttf-wqy-zenhei
-
-RUN apt-get update \
-    && apt-get install -y \
-        lxde gtk2-engines-murrine gnome-themes-standard arc-theme
-
-
-RUN apt-get update && apt-get install -y python3 python3-tk gcc make cmake
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y apt-utils software-properties-common curl apache2-utils \
+        supervisor nginx sudo net-tools zenity dbus-x11 x11-utils alsa-utils \
+        mesa-utils wget xvfb x11vnc vim-tiny ttf-wqy-zenhei lxde gtk2-engines-murrine \
+        gnome-themes-standard arc-theme python3 python3-tk gcc make cmake python3-pip python3-dev build-essential
 
 # tini to fix subreap
 ARG TINI_VERSION=v0.19.0
@@ -41,18 +27,17 @@ RUN wget https://github.com/krallin/tini/archive/v0.19.0.tar.gz \
  && cd ..; rm -r tini-0.19.0 v0.19.0.tar.gz
 
 
-# NextCloud
-RUN apt-get update && apt-get install -y nextcloud-desktop
-
 # Firefox with apt, not snap (which does not run in the container)
 COPY mozilla-firefox_aptprefs.txt /etc/apt/preferences.d/mozilla-firefox
 RUN add-apt-repository -y ppa:mozillateam/ppa
-RUN apt-get update && apt-get install -y --allow-downgrades firefox fonts-lyx
 
 # Chromium beta with apt, not snap (which does not run in the container)
 COPY chromium_aptprefs.txt /etc/apt/preferences.d/chromium
 RUN sudo add-apt-repository -y ppa:saiarcot895/chromium-beta
-RUN  apt-get update && apt-get install -y --allow-downgrades chromium-browser
+
+RUN apt-get update && \
+    apt-get install -y --allow-downgrades chromium-browser firefox fonts-lyx
+
 RUN sed -i 's/Exec=chromium-browser %U/Exec=chromium-browser %U --no-sandbox/g' /usr/share/applications/chromium-browser.desktop
 
 # Killsession app
@@ -70,17 +55,16 @@ RUN cd /tmp/killsession; \
 
 # python library
 COPY rootfs/usr/local/lib/web/backend/requirements.txt /tmp/
-RUN apt-get update \
-    && dpkg-query -W -f='${Package}\n' > /tmp/a.txt \
-    && apt-get install -y python3-pip python3-dev build-essential \
+RUN dpkg-query -W -f='${Package}\n' > /tmp/a.txt \
     && pip3 install -r /tmp/requirements.txt \
     && ln -s /usr/bin/python3 /usr/local/bin/python \
-    && dpkg-query -W -f='${Package}\n' > /tmp/b.txt \
-    && apt-get remove -y `diff --changed-group-format='%>' --unchanged-group-format='' /tmp/a.txt /tmp/b.txt | xargs` \
-    && apt-get autoclean -y \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /var/cache/apt/* /tmp/a.txt /tmp/b.txt
+    && dpkg-query -W -f='${Package}\n' > /tmp/b.txt
+
+RUN apt-get remove -y `diff --changed-group-format='%>' --unchanged-group-format='' /tmp/a.txt /tmp/b.txt | xargs` && \
+    apt-get autoclean -y && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/apt/* /tmp/a.txt /tmp/b.txt
 
 
 ################################################################################
@@ -109,13 +93,13 @@ RUN cd /src/web \
     && yarn build
 RUN sed -i 's#app/locale/#novnc/app/locale/#' /src/web/dist/static/novnc/app/ui.js
 
-RUN apt autoremove && apt autoclean
+# RUN apt autoremove && apt autoclean
 
 ################################################################################
 # merge
 ################################################################################
 FROM system
-LABEL maintainer="frederic.boulanger@centralesupelec.fr"
+# LABEL maintainer="frederic.boulanger@centralesupelec.fr"
 
 COPY --from=builder /src/web/dist/ /usr/local/lib/web/frontend/
 COPY rootfs /
