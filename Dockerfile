@@ -2,11 +2,11 @@
 # base system
 ################################################################################
 
-FROM ubuntu:22.04 as system
+FROM ubuntu:22.04 AS system
 
 # Avoid prompts for time zone
-ENV DEBIAN_FRONTEND noninteractive
-ENV TZ=Europe/Paris
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=America/Sao_Paulo
 # Fix issue with libGL on Windows
 ENV LIBGL_ALWAYS_INDIRECT=1
 
@@ -16,7 +16,16 @@ RUN apt-get update && \
     apt-get install -y apt-utils software-properties-common curl apache2-utils \
         supervisor nginx sudo net-tools zenity dbus-x11 x11-utils alsa-utils \
         mesa-utils wget xvfb x11vnc vim-tiny ttf-wqy-zenhei lxde gtk2-engines-murrine \
-        gnome-themes-standard arc-theme python3 python3-tk gcc make cmake python3-pip python3-dev build-essential
+        arc-theme python3 python3-tk gcc make cmake python3-pip python3-dev build-essential \
+        nano git zsh htop locales man git-lfs procps openssh-client vim.tiny lsb-release python3-zope.interface \
+        iputils-ping pkg-config
+
+RUN git lfs install && \
+    sed -i "s/# en_US.UTF-8/en_US.UTF-8/" /etc/locale.gen && \
+    locale-gen
+ENV LANG=en_US.UTF-8
+
+RUN echo "ubuntu ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/nopasswd > /dev/null
 
 # tini to fix subreap
 ARG TINI_VERSION=v0.19.0
@@ -60,6 +69,8 @@ RUN dpkg-query -W -f='${Package}\n' > /tmp/a.txt \
     && ln -s /usr/bin/python3 /usr/local/bin/python \
     && dpkg-query -W -f='${Package}\n' > /tmp/b.txt
 
+# RUN apt purge -y deluge xscreensaver bc light-locker evince lxmusic smplayer yelp bluez cups
+
 RUN apt-get remove -y `diff --changed-group-format='%>' --unchanged-group-format='' /tmp/a.txt /tmp/b.txt | xargs` && \
     apt-get autoclean -y && \
     apt-get autoremove -y && \
@@ -70,7 +81,7 @@ RUN apt-get remove -y `diff --changed-group-format='%>' --unchanged-group-format
 ################################################################################
 # builder
 ################################################################################
-FROM ubuntu:22.04 as builder
+FROM ubuntu:22.04 AS builder
 
 RUN apt-get update \
     && apt-get install -y curl ca-certificates gnupg
@@ -108,7 +119,16 @@ RUN ln -sf /usr/local/lib/web/frontend/static/websockify /usr/local/lib/web/fron
 
 EXPOSE 80
 WORKDIR /root
+
+RUN wget https://github.com/MuhammedKalkan/OpenLens/releases/download/v6.5.2-366/OpenLens-6.5.2-366.$(dpkg --print-architecture).deb -O openlens.deb && \
+    dpkg -i openlens.deb && \
+    rm openlens.deb
+
+RUN wget https://github.com/coder/code-server/releases/download/v4.90.3/code-server_4.90.3_$(dpkg --print-architecture).deb -O code.deb && \
+    dpkg -i code.deb && \
+    rm code.deb
+
 ENV HOME=/home/ubuntu \
-    SHELL=/bin/bash
+    SHELL=/bin/zsh
 HEALTHCHECK --interval=30s --timeout=5s CMD curl --fail http://127.0.0.1:6079/api/health
 ENTRYPOINT ["/startup.sh"]

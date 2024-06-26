@@ -84,3 +84,11 @@ priority=25
 directory=/usr/local/lib/web/frontend/static/novnc
 command=bash /usr/local/lib/web/frontend/static/novnc/utils/launch.sh --listen 6081
 stopasgroup=true
+
+[program:code]
+priority=10
+directory=%HOME%
+command=/usr/bin/code-server --auth none
+user=%USER%
+stopwaitsecs=3
+environment=DISPLAY=":1",HOME="%HOME%",USER="%USER%"
